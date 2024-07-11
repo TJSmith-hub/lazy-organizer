@@ -1,14 +1,17 @@
 from nicegui import ui, app
 from tabs.tasks import list_ui
-from tabs.finance import expences_ui
+from tabs.finance import finance_ui
 from tabs.database import Database
 
 def init():
     ui.dark_mode().enable()
+    if 'current_user' not in app_data:
+        app_data['current_user'] = {}
 
 def set_user(user):
-    app_data['current_user'] = user
-    print('set user', user)
+    app_data['current_user'] = dict(user)
+    list_ui.refresh()
+    finance_ui.refresh()
     
 def remove_user(user):
     db.remove_user(user)
@@ -17,7 +20,6 @@ def remove_user(user):
     
 def add_user(user):
     db.add_user(user)
-    set_user(user)
     user_tabs_ui.refresh()
 
 @ui.refreshable
@@ -27,13 +29,11 @@ def user_tabs_ui():
         
         with ui.tabs().classes('flex-grow').props('no-caps') as user_tabs:
             for user in db.get_users():
-                ui.tab(user[1]).on('click', lambda user=user: set_user(user))
-                list_ui.refresh()
-                expences_ui.refresh()
+                ui.tab(user['name']).on('click', lambda user=user: set_user(user))
                 
-        user_tabs.set_value(app_data['current_user'][1])
+        user_tabs.set_value(app_data['current_user']['name'])
                 
-        ui.button(on_click=lambda: remove_user(app_data['current_user'][0]), icon='delete').props('flat fab-mini color=grey')
+        ui.button(on_click=lambda: remove_user(app_data['current_user']['id']), icon='delete').props('flat fab-mini color=grey')
         ui.input('New User').bind_value(new_user, 'name')
         ui.button(on_click=lambda: add_user(new_user['name']), icon='add').props('flat fab-mini color=grey')
 
@@ -53,7 +53,7 @@ with ui.tab_panels(tabs, value=tasks).classes('w-full'):
     with ui.tab_panel(cleaning):
         pass
     with ui.tab_panel(finance):
-        #expences_ui(app_data)
+        finance_ui(app_data)
         pass
 
 
