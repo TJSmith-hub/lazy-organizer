@@ -60,6 +60,10 @@ class Database:
     def get_users(self):
         self.c.execute('SELECT * FROM users')
         return self.c.fetchall()
+    
+    def get_user(self, id):
+        self.c.execute('SELECT * FROM users WHERE id = ?', (id,))
+        return self.c.fetchone()
 
     def remove_user(self, id):
         # get user name
