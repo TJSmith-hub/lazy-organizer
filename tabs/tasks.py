@@ -29,7 +29,9 @@ ColorMap = {'Easy': 'lightgreen', 'Medium': 'lightyellow', 'Hard': 'lightcoral'}
 def tasks_list_ui(app_data, task_list):
     with ui.row().classes('items-center w-full'):
         ui.label(task_list['name']).classes('flex-grow text-2xl')
-        ui.button(on_click=lambda: remove_task_list(app_data, task_list['id']), icon='delete').props('flat fab-mini color=grey')
+        if app_data['current_user']['name'] != 'Shared':
+            ui.button(on_click=lambda: remove_task_list(app_data, task_list['id']), icon='delete').props('flat fab-mini color=grey')
+    
     tasks = db.get_tasks_from_list(task_list['id'])
     if len(tasks) == 0:
         ui.label('List is empty.')
@@ -38,19 +40,19 @@ def tasks_list_ui(app_data, task_list):
             with ui.row().classes('items-center w-full').style(f'background-color: {ColorMap[item[2]]}; border-radius: 10px;'):
                 ui.checkbox(value=bool(item['done']), on_change=lambda item=item: toggle_done(app_data, item['id']))
                 ui.label(item[1]).classes('flex-grow text-black')
-                ui.button(on_click=lambda item=item: remove_task(app_data, item['id']), icon='delete').props('flat fab-mini color=grey')
+                if app_data['current_user']['name'] != 'Shared':
+                    ui.button(on_click=lambda item=item: remove_task(app_data, item['id']), icon='delete').props('flat fab-mini color=grey')
 
-    new_task = {'name': '', 'difficulty': 'Easy', 'done': False}
-
-    with ui.row().classes('items-center'):
-        ui.input('Name').classes('flex-grow').bind_value(new_task, 'name')
-        ui.select(['Easy', 'Medium', 'Hard']).bind_value(new_task, 'difficulty')
-        ui.button(on_click=lambda new_task=new_task: add_task(app_data, new_task, task_list['id']), icon='add').props('flat fab-mini color=grey')
+    if app_data['current_user']['name'] != 'Shared':
+        new_task = {'name': '', 'difficulty': 'Easy', 'done': False}
+        with ui.row().classes('items-center'):
+            ui.input('Name').classes('flex-grow').bind_value(new_task, 'name')
+            with ui.row().classes('items-center'):
+                ui.select(['Easy', 'Medium', 'Hard']).bind_value(new_task, 'difficulty')
+                ui.button(on_click=lambda new_task=new_task: add_task(app_data, new_task, task_list['id']), icon='add').props('flat fab-mini color=grey')
         
 @ui.refreshable
 def list_ui(app_data):
-    
-    
     # Get current visible task lists
     if app_data['current_user']['name'] == 'Shared':
         task_lists = []
@@ -68,15 +70,14 @@ def list_ui(app_data):
     # Display task list cards
     with ui.row():
         for l in task_lists:
-            with ui.card().style('margin: 10px; border-radius:10px;'):
+            with ui.card().classes('min-w-[300px] max-w-[400px]').style('border-radius:10px;'):
                 tasks_list_ui(app_data, l)
     
     # New task list form card
-    if app_data['current_user']['id'] != 'Shared':
+    if app_data['current_user']['name'] != 'Shared':
         new_list= {'name': '', 'shared': False}
-        
-        with ui.card().style('margin: 10px; border-radius:10px;'):
-            ui.input('New list name').bind_value(new_list, 'name')
+        with ui.card().classes('min-w-[300px] max-w-[400px]').style('border-radius:10px;'):
             with ui.row():
+                ui.input('New list name').classes('w-full').bind_value(new_list, 'name')
                 ui.checkbox('Shared').bind_value(new_list, 'shared')
                 ui.button(on_click=lambda: add_task_list(app_data, new_list), icon='add').props('flat fab-mini color=grey')

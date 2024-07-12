@@ -46,6 +46,16 @@ class Database:
             user_id INTEGER, 
             FOREIGN KEY(user_id) REFERENCES users(id))''')
         
+        self.c.execute('''CREATE TABLE IF NOT EXISTS cleaning (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            name TEXT, 
+            room TEXT, 
+            schedule TEXT,
+            done BOOLEAN,
+            user_id INTEGER, 
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )''')
+        
         # add default users
         if len(self.get_users()) == 0:
             self.add_user('Shared')
@@ -73,6 +83,7 @@ class Database:
             self.c.execute('DELETE FROM users WHERE id = ?', (id,))
             self.c.execute('DELETE FROM task_lists WHERE user_id = ?', (id,))
             self.c.execute('DELETE FROM tasks WHERE list_id IN (SELECT id FROM task_lists WHERE user_id = ?)', (id,))
+            self.c.execute('DELETE FROM income WHERE user_id = ?', (id,))
             self.c.execute('DELETE FROM expences WHERE user_id = ?', (id,))
             self.conn.commit()
 
@@ -135,6 +146,26 @@ class Database:
 
     def remove_expence(self, expence_id):
         self.c.execute('DELETE FROM expences WHERE id = ?', (expence_id,))
+        self.conn.commit()
+        
+    def add_cleaning(self, name, room, schedule, done, user_id):
+        self.c.execute('INSERT INTO cleaning (name, room, schedule, done, user_id) VALUES (?, ?, ?, ?, ?)', (name, room, schedule, done, user_id))
+        self.conn.commit()
+    
+    def get_cleaning(self, user_id):
+        self.c.execute('SELECT * FROM cleaning WHERE user_id = ?', (user_id,))
+        return self.c.fetchone()
+    
+    def get_all_cleaning(self):
+        self.c.execute('SELECT * FROM cleaning')
+        return self.c.fetchall()
+    
+    def update_cleaning(self, cleaning_id, done):
+        self.c.execute('UPDATE cleaning SET done = ? WHERE id = ?', (done, cleaning_id))
+        self.conn.commit()
+    
+    def remove_cleaning(self, cleaning_id):
+        self.c.execute('DELETE FROM cleaning WHERE id = ?', (cleaning_id,))
         self.conn.commit()
 
     def close(self):

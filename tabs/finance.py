@@ -3,7 +3,7 @@ from tabs.database import Database
 
 db = Database()
 
-expence_categories = ['Bills', 'Food', 'Transport', 'Entertainment', 'Health', 'Clothing', 'Savings', 'Other']
+expence_categories = ['Bills', 'Food', 'Transport', 'Entertainment', 'Health', 'Clothing', 'Pets','Savings', 'Other']
 
 def add_income(user_id, income):
     if income['income'].replace('.', '').isdigit():
@@ -107,20 +107,23 @@ def finance_ui(app_data):
     
     with ui.grid().classes('grid md:grid-cols-2 gap-2 w-full'):
         # display income
-        with ui.card().classes('w-full'):
+        with ui.card().classes('w-full').style('border-radius:10px;'):
             ui.label('Income')
-            with ui.grid(columns='1fr 1fr 1fr auto').classes('w-full items-center gap-2'):
-                ui.label('Name').classes('border-l-2 p-2')
-                ui.label('Frequency').classes('border-l-2 p-2')
-                ui.label('Income').classes('border-l-2 p-2')
-                ui.label('').classes('border-l-2 p-2')
+            with ui.grid(columns='auto 1fr 1fr auto').classes('w-full items-center gap-0'):
+                ui.label('Name').classes('border-l-2 border-b-2 p-3')
+                ui.label('Frequency').classes('border-l-2 border-b-2 p-3')
+                ui.label('Income').classes('border-l-2 border-b-2 p-3')
+                ui.label('').classes('p-2')
                 
                 for row in income_rows:
-                    ui.label(row['name']).classes('border-l-2 p-2')
-                    ui.label(row['frequency']).classes('border-l-2 p-2')
-                    ui.label(row['income']).classes('border-l-2 p-2')
-                    ui.button(on_click=lambda row=row: delete_income(row['id']), icon='delete').props('flat fab-mini color=grey').classes('border-l-2 p-2')
-                
+                    ui.label(row['name']).classes('border-l-2 p-3')
+                    ui.label(row['frequency']).classes('border-l-2 p-3')
+                    ui.label(row['income']).classes('border-l-2 p-3')
+                    if app_data['current_user']['name'] != 'Shared':
+                        ui.button(on_click=lambda row=row: delete_income(row['id']), icon='delete').props('flat fab-mini color=grey')
+                    else:
+                        ui.label(db.get_user(row['user_id'])['name'])
+                        
                 # add new income
                 if app_data['current_user']['name'] != 'Shared':
                     new_income = {'name': '', 'frequency': '', 'income': ''}
@@ -130,22 +133,24 @@ def finance_ui(app_data):
                     ui.button(on_click=lambda new_income=new_income: add_income(app_data['current_user']['id'], new_income), icon='add').props('flat fab-mini color=grey')
 
         # display expences
-        with ui.card().classes('w-full'):
+        with ui.card().classes('w-full').style('border-radius:10px;'):
             ui.label('Expences')
             with ui.grid(columns='1fr 1fr 1fr 1fr auto').classes('w-full items-center gap-0'):
-                ui.label('Name').classes('border-l-2 p-2')
-                ui.label('Category').classes('border-l-2 p-2')
-                ui.label('Frequency').classes('border-l-2 p-2')
-                ui.label('Cost').classes('border-l-2 p-2')
-                ui.label('').classes('border-l-2 p-2')
+                ui.label('Name').classes('border-l-2 border-b-2 p-3')
+                ui.label('Category').classes('border-l-2 border-b-2 p-3')
+                ui.label('Frequency').classes('border-l-2 border-b-2 p-3')
+                ui.label('Cost').classes('border-l-2 border-b-2 p-3')
+                ui.label('')
                 
                 for row in expences_rows:
-                    ui.label(row['name']).classes('border-l-2 p-2')
-                    ui.label(row['category']).classes('border-l-2 p-2')
-                    ui.label(row['frequency']).classes('border-l-2 p-2')
-                    ui.label(row['cost']).classes('border-l-2 p-2')
-                    ui.button(on_click=lambda row=row: delete_expence(row['id']), icon='delete', ).props('flat fab-mini color=grey size=3').classes('border-l-2 p-2')
-                
+                    ui.label(row['name']).classes('border-l-2 p-3')
+                    ui.label(row['category']).classes('border-l-2 p-3')
+                    ui.label(row['frequency']).classes('border-l-2 p-3')
+                    ui.label(row['cost']).classes('border-l-2 p-3')
+                    if app_data['current_user']['name'] != 'Shared':
+                        ui.button(on_click=lambda row=row: delete_expence(row['id']), icon='delete', ).props('flat fab-mini color=grey size=3')
+                    else:
+                        ui.label(db.get_user(row['user_id'])['name'])
                 # add new expence
                 if app_data['current_user']['name'] != 'Shared':
                     new_expence = {'name': '', 'category': '', 'frequency': '', 'cost': ''}
@@ -156,47 +161,47 @@ def finance_ui(app_data):
                     ui.button(on_click=lambda: add_expence(app_data['current_user']['id'], new_expence), icon='add').props('flat fab-mini color=grey')
             
         # display stats
-        with ui.card().classes('w-full'):
+        with ui.card().classes('w-full').style('border-radius:10px;'):
             ui.label('Stats') 
             with ui.grid(columns='1fr 1fr 1fr 1fr').classes('w-full items-center gap-0'):
-                ui.label('Total').classes('border-l-2 border-b-2 p-2')
-                ui.label('Annually').classes('border-l-2 border-b-2 p-2')
-                ui.label('Monthly').classes('border-l-2 border-b-2 p-2')
-                ui.label('Weekly').classes('border-l-2 border-b-2 p-2')
+                ui.label('Total').classes('border-l-2 border-b-2 p-3')
+                ui.label('Annually').classes('border-l-2 border-b-2 p-3')
+                ui.label('Monthly').classes('border-l-2 border-b-2 p-3')
+                ui.label('Weekly').classes('border-l-2 border-b-2 p-3')
                 
-                ui.label('Income').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_income, 2)}').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_income / 12, 2)}').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_income / 52, 2)}').classes('border-l-2 p-2')
+                ui.label('Income').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_income, 2)}').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_income / 12, 2)}').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_income / 52, 2)}').classes('border-l-2 p-3')
                 
-                ui.label('Expences').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_expences, 2)}').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_expences / 12, 2)}').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_expences / 52, 2)}').classes('border-l-2 p-2')
+                ui.label('Expences').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_expences, 2)}').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_expences / 12, 2)}').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_expences / 52, 2)}').classes('border-l-2 p-3')
                 
-                ui.label('Net Worth').classes('border-l-2 p-2')
-                ui.label(f'£{round(total_income - total_expences, 2)}').classes('border-l-2 p-2')
-                ui.label(f'£{round((total_income - total_expences) / 12, 2)}').classes('border-l-2 p-2')
-                ui.label(f'£{round((total_income - total_expences) / 52, 2)}').classes('border-l-2 p-2')
+                ui.label('Net Worth').classes('border-l-2 p-3')
+                ui.label(f'£{round(total_income - total_expences, 2)}').classes('border-l-2 p-3')
+                ui.label(f'£{round((total_income - total_expences) / 12, 2)}').classes('border-l-2 p-3')
+                ui.label(f'£{round((total_income - total_expences) / 52, 2)}').classes('border-l-2 p-3')
 
             ui.label('Category').classes('border-l-2 pl-2 text-bold')
 
             with ui.grid(columns='1fr 1fr 1fr 1fr').classes('w-full items-center gap-0'):                
                 for category in category_data:
-                    ui.label(f'{category["name"]}').classes('border-l-2 p-2')
-                    ui.label(f'£{category["value"]}').classes('border-l-2 p-2')
-                    ui.label(f'£{round(category["value"]/12, 2)}').classes('border-l-2 p-2')
-                    ui.label(f'£{round(category["value"]/52, 2)}').classes('border-l-2 p-2')
+                    ui.label(f'{category["name"]}').classes('border-l-2 p-3')
+                    ui.label(f'£{category["value"]}').classes('border-l-2 p-3')
+                    ui.label(f'£{round(category["value"]/12, 2)}').classes('border-l-2 p-3')
+                    ui.label(f'£{round(category["value"]/52, 2)}').classes('border-l-2 p-3')
 
         
-        with ui.card().classes('w-full'):
+        with ui.card().classes('w-full').style('border-radius:10px;'):
             ui.label('Charts')
             
-            pi_chart([
-                {'value': total_expences, 'name': 'Expences'},
-                {'value': total_income - total_expences, 'name': 'Remaining'}
-            ])
-            
-            pi_chart(category_data)
+            with ui.row().classes('items-center w-full'):
+                pi_chart([
+                    {'value': total_expences, 'name': 'Expences'},
+                    {'value': total_income - total_expences, 'name': 'Remaining'}
+                ])
+                pi_chart(category_data)
 
 

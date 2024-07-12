@@ -1,6 +1,7 @@
 from nicegui import ui, app
 from tabs.tasks import list_ui
 from tabs.finance import finance_ui
+from tabs.cleaning import cleaning_ui
 from tabs.database import Database
 
 def init():
@@ -12,6 +13,7 @@ def set_user(user):
     app_data['current_user'] = dict(user)
     list_ui.refresh()
     finance_ui.refresh()
+    cleaning_ui.refresh()
     
 def remove_user(user):
     db.remove_user(user)
@@ -51,10 +53,8 @@ with ui.tab_panels(tabs, value=tasks).classes('w-full'):
     with ui.tab_panel(tasks):
         list_ui(app_data)
     with ui.tab_panel(cleaning):
-        pass
+        cleaning_ui(app_data)
     with ui.tab_panel(finance):
         finance_ui(app_data)
-        pass
-
 
 ui.run()
